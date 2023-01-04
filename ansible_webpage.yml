@@ -1,0 +1,26 @@
+---
+- name: Apache webserver configuration
+  hosts: all
+  become: true
+  tasks:
+    - name: Install apache
+      yum:
+        name: httpd
+        state: present
+    
+    - name: Start apache service
+      service:
+        name: httpd
+        state: started
+          
+    - name: Copy index file to apache directory
+      copy:
+        src: /etc/ansible/index.html
+        dest: /var/www/html/
+          
+    - name: Restart Apache service
+      service:
+        name: httpd
+        state: restarted
+          
+
