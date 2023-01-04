@@ -10,3 +10,27 @@
         src: my_app.j2
         dest: /etc/my_app.conf
 ...
+
+--------------------------------------
+my_app.j2
+========
+env: {{ env }}
+IP_address : {{ ansible_host }}
+My_hostname : {{ ansible_hostname }}
+local_user: {{ ansible_user_id }}
+-----------------------------------------
+output:
+======
+[root@ip-172-31-23-237 ~]# cat /etc/my_app.conf
+env: staging
+IP_address : ip-172-31-23-237.eu-west-2.compute.internal
+My_hostname : ip-172-31-23-237
+local_user: root
+[root@ip-172-31-23-237 ~]#
+
+[root@ip-172-31-25-103 ~]# cat /etc/my_app.conf
+env: staging
+IP_address : ip-172-31-25-103.eu-west-2.compute.internal
+My_hostname : ip-172-31-25-103
+local_user: root
+[root@ip-172-31-25-103 ~]#
