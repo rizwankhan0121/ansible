@@ -1,0 +1,12 @@
+---
+- name: Template to on run on all the hosts
+  hosts: all
+  become: true
+  vars:
+    env: staging
+  tasks:
+    - name: template a file on the remote hosts
+      template:
+        src: my_app.j2
+        dest: /etc/my_app.conf
+...
