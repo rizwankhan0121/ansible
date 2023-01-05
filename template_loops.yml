@@ -1,0 +1,46 @@
+---
+- name: Template with loop demonstration
+  hosts: all
+  vars:
+    users:
+      - name: John smith
+        username: jsmith
+      - name: Jane doe
+        username: jdoe
+  tasks:
+    - name: create users on to the remote hosts
+      become: true
+      user:
+        name: "{{ user.username }}"
+        comment: "{{ user.name }}"
+        state: present
+      loop:  "{{ users }}"
+      loop_control:
+        loop_var: user
+
+    - name: create .gitconfig in the users home directory
+      become: true
+      template:
+        src: gitconfig.j2
+        dest: "/home/{{ user.username }}/.gitconfig"
+        owner: "{{ user.username }}"
+        group: "{{ user.username }}"
+        mode: 0644
+      loop:  "{{ users }}"
+      loop_control:
+        loop_var: user
+
+----------------------------------------------
+gitconfig.j2
+===========
+[user]
+name={{ user.name }}
+username={{ user.username }}
+email={{ user.username }}@example.com
+
+----------------------------------------------
+
+
+
+
+
