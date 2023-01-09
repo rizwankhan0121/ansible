@@ -1,0 +1,39 @@
+---
+- name: Copying SSH key on the remote host using Ansible
+  hosts: all
+  become: true
+  vars:
+    ssh_user: ansible
+  tasks:
+    - name: check if already ssh connectivity established with this user?
+      stat:
+        path: /home/{{ ssh_user }}/.ssh/authorized_keys
+      register: auth_key_file_exits
+
+    - name: file key exists?
+      debug: var=auth_key_file_exits.stat.exists
+
+    - name: check if authorized key contains public key of ansible controller?
+      shell: cat /home/{{ ssh_user }}/.ssh/authorized_keys|grep "ansible"
+      register: auth_key_exits
+      ignore_errors: true
+      when: auth_key_file_exits.stat.exists
+
+    - debug: var=auth_key_exits.rc
+
+    - name: Job to set passwordless connectivity if user is having root access..
+      block:
+       - name: make the .ssh dir if doesnt exist
+         file: path=/home/{{ ssh_user }}/.ssh state=directory owner={{ ssh_user }}
+
+       - name: Create the auth key file
+         file: path=/home/{{ ssh_user }}/.ssh/authorized_keys state=touch
+
+       - name: Add identity key to authorized keys on host
+         authorized_key:
+           user: "{{ ssh_user }}"
+           key: "{{ lookup('file', ssh_identity_key) }}"
+         register: add_identity_key
+         when: ssh_identity_key is defined and ssh_user is defined
+      when: auth_key_file_exits.stat.exists == false or auth_key_exits.rc == 1
+      ignore_errors: true
