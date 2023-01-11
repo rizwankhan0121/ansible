@@ -1,0 +1,35 @@
+---
+- name: Create users , Groups and set passwords 
+  hosts: all
+  become: true
+  vars_files:
+    - users_list.yml
+    - vault.yml
+
+  tasks:
+    - name: Create groups
+      group:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - devops
+        - opsmgr
+
+    - name: User Creation where the job is Devops and add user in Devops Group
+      user:
+        name: "{{ item.name }}"
+        state: present
+        group: devops
+        password: "{{ pw_devops | password_hash('sha512') }}"
+      loop: "{{ users }}"
+      when: item.job == "devops" and inventory_hostname in groups['dev']
+
+    - name: User Creation where the job is opsmgr and add user in Manager Group 
+      user:
+        name: "{{ item.name }}"
+        state: present
+        group: opsmgr
+        password: "{{ pw_opsmgr | password_hash('sha512') }}"
+      loop: "{{ users }}"
+      when: item.job == "opsmgr" and inventory_hostname in groups['test']
+
